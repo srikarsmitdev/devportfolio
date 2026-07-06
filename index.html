@@ -1,1048 +1,814 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRIKARASMIT — Design. Intelligence. Craft.</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Serif+JP:wght@200;300;400;500;600&display=swap"
-        rel="stylesheet">
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'crimson': '#FF0033',
-                        'crimson-glow': 'rgba(255,0,51,0.15)',
-                    },
-                    fontFamily: {
-                        'sans': ['Inter', 'sans-serif'],
-                        'mono': ['JetBrains Mono', 'monospace'],
-                        'jp': ['Noto Serif JP', 'serif'],
-                    },
-                    letterSpacing: {
-                        'tightest': '-0.06em',
-                        'widest-xl': '0.4em',
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            cursor: none;
-        }
-
-        html {
-            background: #000;
-        }
-
-        body {
-            background: #000;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-
-        ::selection {
-            background: #FF0033;
-            color: #000;
-        }
-
-        /* Custom Cursor */
-        .cursor-dot {
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 10001;
-            mix-blend-mode: difference;
-            transition: transform 0.15s ease, background 0.3s ease;
-        }
-
-        .cursor-ring {
-            width: 40px;
-            height: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 10000;
-            mix-blend-mode: difference;
-            transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1), height 0.4s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.4s ease, background 0.4s ease;
-        }
-
-        .cursor-hover .cursor-dot {
-            transform: scale(0);
-        }
-
-        .cursor-hover .cursor-ring {
-            width: 64px;
-            height: 64px;
-            border-color: #FF0033;
-            background: rgba(255, 0, 51, 0.08);
-        }
-
-        @media (pointer: coarse) {
-
-            .cursor-dot,
-            .cursor-ring {
-                display: none !important;
-            }
-
-            * {
-                cursor: auto;
-            }
-        }
-
-        /* Grain Overlay */
-        .grain-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            pointer-events: none;
-            opacity: 0.05;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-            background-size: 256px 256px;
-            animation: grainShift 0.5s steps(3) infinite;
-        }
-
-        @keyframes grainShift {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            33% {
-                transform: translate(-2px, 3px);
-            }
-
-            66% {
-                transform: translate(3px, -1px);
-            }
-
-            100% {
-                transform: translate(-1px, 2px);
-            }
-        }
-
-        /* Scroll Progress */
-        .scroll-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 2px;
-            height: 0%;
-            background: #FF0033;
-            z-index: 9997;
-            transition: none;
-            box-shadow: 0 0 12px rgba(255, 0, 51, 0.6);
-        }
-
-        /* Loading Screen */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 10002;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .loading-bar {
-            width: 120px;
-            height: 1px;
-            background: #222;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .loading-bar-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 0%;
-            background: #FF0033;
-        }
-
-        /* Mask Reveal Lines */
-        .mask-line {
-            clip-path: inset(0 100% 0 0);
-        }
-
-        /* Glitch Effect */
-        .glitch-text {
-            position: relative;
-        }
-
-        .glitch-text::before,
-        .glitch-text::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-        }
-
-        .glitch-text::before {
-            color: #FF0033;
-        }
-
-        .glitch-text::after {
-            color: #00ffff;
-        }
-
-        .glitch-text:hover::before {
-            opacity: 0.8;
-            animation: glitch1 0.3s steps(2) infinite;
-        }
-
-        .glitch-text:hover::after {
-            opacity: 0.6;
-            animation: glitch2 0.3s steps(2) infinite;
-        }
-
-        @keyframes glitch1 {
-            0% {
-                clip-path: inset(40% 0 61% 0);
-                transform: translate(-3px, 2px);
-            }
-
-            25% {
-                clip-path: inset(92% 0 1% 0);
-                transform: translate(2px, -1px);
-            }
-
-            50% {
-                clip-path: inset(43% 0 1% 0);
-                transform: translate(-1px, 3px);
-            }
-
-            75% {
-                clip-path: inset(25% 0 58% 0);
-                transform: translate(3px, 1px);
-            }
-
-            100% {
-                clip-path: inset(58% 0 43% 0);
-                transform: translate(-2px, -3px);
-            }
-        }
-
-        @keyframes glitch2 {
-            0% {
-                clip-path: inset(65% 0 13% 0);
-                transform: translate(3px, -2px);
-            }
-
-            25% {
-                clip-path: inset(15% 0 62% 0);
-                transform: translate(-2px, 1px);
-            }
-
-            50% {
-                clip-path: inset(80% 0 5% 0);
-                transform: translate(1px, -3px);
-            }
-
-            75% {
-                clip-path: inset(35% 0 40% 0);
-                transform: translate(-3px, 2px);
-            }
-
-            100% {
-                clip-path: inset(5% 0 75% 0);
-                transform: translate(2px, 3px);
-            }
-        }
-
-        /* Slow Hover */
-        .slow-hover {
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .slow-hover:hover {
-            color: #FF0033;
-            text-shadow: 0 0 30px rgba(255, 0, 51, 0.3);
-        }
-
-        /* Fracture Layers */
-        .fracture-layer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Image mask reveal */
-        .img-mask-reveal {
-            clip-path: circle(0% at 50% 50%);
-        }
-
-        /* Chapter Number */
-        .chapter-num {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: #FF0033;
-        }
-
-        /* Scroll indicator */
-        @keyframes scrollBounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-                opacity: 0.6;
-            }
-
-            50% {
-                transform: translateY(8px);
-                opacity: 1;
-            }
-        }
-
-        .scroll-indicator {
-            animation: scrollBounce 2s ease-in-out infinite;
-        }
-
-        /* Horizontal rule crimson */
-        .hr-crimson {
-            width: 60px;
-            height: 1px;
-            background: #FF0033;
-            border: none;
-        }
-
-        /* Project card hover */
-        .project-card {
-            transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .project-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .project-card:hover .project-img {
-            filter: brightness(0.5) contrast(1.3);
-            transform: scale(1.03);
-        }
-
-        .project-img {
-            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-            filter: brightness(0.35) contrast(1.2);
-        }
-
-        /* Philosophy overlap */
-        .overlap-text {
-            mix-blend-mode: difference;
-        }
-
-        /* Audio button pulse */
-        .audio-pulse {
-            animation: audioPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes audioPulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 0, 51, 0.4);
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(255, 0, 51, 0);
-            }
-        }
-
-        /* Japanese decorative */
-        .jp-deco {
-            font-family: 'Noto Serif JP', serif;
-            font-weight: 200;
-            line-height: 1;
-        }
-
-        /* Smooth image container */
-        .img-container {
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Line draw animation */
-        .line-draw {
-            width: 0;
-            transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .line-draw.active {
-            width: 60px;
-        }
-
-        /* Terminal code style for ML section */
-        .terminal-line {
-            border-left: 1px solid rgba(255, 0, 51, 0.2);
-            padding-left: 16px;
-            margin-bottom: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Srikarasmit — Full Stack Web Developer based in Bangalore, India, focused on AI-powered applications and scalable architectures.">
+  <title>SRIKARASMIT | Full Stack Web Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Space+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:      #FAF7F6;
+      --fg:      #A91523;
+      --muted:   #A87078;
+      --rule:    #EDCFD2;
+      --hover:   #F5ECED;
+      --ff-d: 'Space Grotesk', sans-serif;
+      --ff-b: 'DM Sans', sans-serif;
+      --ff-m: 'Space Mono', monospace;
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--ff-b);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── SCROLL PROGRESS ─── */
+    #progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 1.5px;
+      background: var(--fg);
+      z-index: 500;
+      width: 0%;
+      transition: width 0.08s linear;
+    }
+
+    /* ─── MARQUEE ─── */
+    .marquee {
+      background: var(--fg);
+      color: var(--bg);
+      padding: 9px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .marquee-track {
+      display: inline-flex;
+      animation: scroll-marquee 36s linear infinite;
+    }
+    .marquee-track span {
+      font-family: var(--ff-m);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding-right: 64px;
+    }
+    .marquee-track span::before {
+      content: '·';
+      margin-right: 64px;
+      opacity: 0.4;
+    }
+    @keyframes scroll-marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250, 247, 246, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 52px;
+    }
+    .logo {
+      font-family: var(--ff-d);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .site-nav {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+    }
+    .site-nav a {
+      font-family: var(--ff-m);
+      font-size: 10.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.45;
+      transition: opacity 0.2s;
+    }
+    .site-nav a:hover { opacity: 1; }
+    .nav-num {
+      opacity: 0.5;
+      margin-right: 3px;
+    }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 72px 52px 52px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .hero-tag {
+      font-family: var(--ff-m);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .hero-name {
+      font-family: var(--ff-d);
+      font-size: clamp(3.6rem, 10.5vw, 13.5rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 0.88;
+      color: var(--fg);
+      margin-bottom: 48px;
+    }
+    .hero-role {
+      font-family: var(--ff-d);
+      font-size: clamp(1rem, 2.5vw, 2.1rem);
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--fg);
+      line-height: 1.25;
+      max-width: 420px;
+    }
+    .hero-desc {
+      max-width: 480px;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-top: 28px;
+    }
+    .hero-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .meta-item {}
+    .meta-label {
+      font-family: var(--ff-m);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .meta-value {
+      font-family: var(--ff-m);
+      font-size: 11.5px;
+      color: var(--fg);
+    }
+    .scroll-cue {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .scroll-line {
+      width: 36px;
+      height: 1px;
+      background: var(--muted);
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { width: 36px; opacity: 0.5; }
+      50%       { width: 56px; opacity: 1; }
+    }
+
+    /* ─── SECTION SHARED ─── */
+    section { border-bottom: 1px solid var(--rule); }
+    .wrap { padding: 96px 52px; }
+
+    .s-decor {
+      font-family: var(--ff-b);
+      font-size: 11.5px;
+      color: var(--rule);
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+    .s-eye {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .s-title {
+      font-family: var(--ff-d);
+      font-size: clamp(2.4rem, 5.5vw, 6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 0.97;
+      margin-bottom: 80px;
+    }
+
+    /* bracket util */
+    .bk::before { content: '['; }
+    .bk::after  { content: ']'; }
+
+    /* ─── ABOUT ─── */
+    .about-intro {
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--fg);
+      max-width: 720px;
+      margin-bottom: 72px;
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 96px;
+    }
+    .about-block {
+      padding: 32px 0;
+      border-top: 1px solid var(--rule);
+    }
+    .about-block-label {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .about-block-body {
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--fg);
+    }
+    .edu-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--rule);
+      gap: 16px;
+    }
+    .edu-row:last-child { border-bottom: none; }
+    .edu-name { font-size: 14.5px; font-weight: 500; }
+    .edu-sub  {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .edu-yr {
+      font-family: var(--ff-m);
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ─── SKILLS ─── */
+    .skills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .skill {
+      font-family: var(--ff-m);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      border: 1px solid var(--rule);
+      color: var(--fg);
+      transition: background 0.16s, color 0.16s, border-color 0.16s;
+      cursor: default;
+    }
+    .skill:hover {
+      background: var(--fg);
+      color: var(--bg);
+      border-color: var(--fg);
+    }
+
+    /* ─── PROJECTS ─── */
+    .project {
+      padding: 56px 0;
+      border-top: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0 72px;
+      align-items: start;
+      transition: padding-left 0.35s ease;
+    }
+    .project:last-child { border-bottom: 1px solid var(--rule); }
+    .project:hover { padding-left: 18px; }
+    .proj-title {
+      font-family: var(--ff-d);
+      font-size: clamp(1.6rem, 3.8vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.0;
+      margin-bottom: 22px;
+    }
+    .proj-desc {
+      font-size: 14.5px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 580px;
+    }
+    .proj-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      min-width: 196px;
+    }
+    .proj-meta-label {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .proj-meta-label.bk::before { content: '['; }
+    .proj-meta-label.bk::after  { content: ']'; }
+    .proj-meta-val {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--fg);
+    }
+
+    /* ─── CONTACT ─── */
+    .contact-head {
+      font-family: var(--ff-d);
+      font-size: clamp(2rem, 5vw, 5.5rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.12;
+      margin-bottom: 72px;
+      max-width: 800px;
+    }
+    .contact-head em {
+      font-style: italic;
+      font-weight: 300;
+    }
+    .contact-links { display: flex; flex-direction: column; }
+    .cl-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--rule);
+      transition: padding-left 0.3s ease, opacity 0.2s;
+    }
+    .cl-item:first-child { border-top: 1px solid var(--rule); }
+    .cl-item:hover { padding-left: 14px; }
+    .cl-lbl {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .cl-val {
+      font-family: var(--ff-d);
+      font-size: clamp(1rem, 2.2vw, 1.6rem);
+      font-weight: 500;
+    }
+    .cl-arrow {
+      font-size: 20px;
+      color: var(--muted);
+      transition: transform 0.3s ease;
+    }
+    .cl-item:hover .cl-arrow { transform: translateX(5px); }
+
+    /* ─── FOOTER ─── */
+    .footer-grid {
+      padding: 64px 52px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+    }
+    .footer-col-head {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .f-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      list-style: none;
+    }
+    .f-links a, .f-links p {
+      font-size: 13.5px;
+      opacity: 0.72;
+      transition: opacity 0.2s;
+      color: var(--fg);
+    }
+    .f-links a:hover { opacity: 1; }
+    .f-credit {
+      font-family: var(--ff-m);
+      font-size: 9.5px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-top: 32px;
+    }
+
+
+    /* ─── REVEAL ANIMATION ─── */
+    .rv {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.72s ease, transform 0.72s ease;
+    }
+    .rv.in { opacity: 1; transform: translateY(0); }
+    .rv.d1 { transition-delay: 0.1s; }
+    .rv.d2 { transition-delay: 0.2s; }
+    .rv.d3 { transition-delay: 0.3s; }
+    .rv.d4 { transition-delay: 0.4s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      header { padding: 16px 28px; }
+      .site-nav { gap: 24px; }
+      #hero, .wrap { padding-left: 28px; padding-right: 28px; }
+      .about-grid { grid-template-columns: 1fr; gap: 0; }
+      .project {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .proj-meta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 20px 40px;
+      }
+      .footer-grid { grid-template-columns: 1fr 1fr; padding: 48px 28px; }
+      .footer-ty { padding: 40px 28px; }
+    }
+    @media (max-width: 560px) {
+      .site-nav { display: none; }
+      #hero { min-height: 80vh; padding-top: 48px; padding-bottom: 40px; }
+      .hero-meta { gap: 28px; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .project:hover { padding-left: 0; }
+      .cl-item:hover { padding-left: 0; }
+    }
+  </style>
 </head>
 
 <body>
+  <div id="progress"></div>
 
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loader">
-        <span class="font-mono text-[11px] tracking-[0.4em] text-white/50 uppercase">SRIKARASMIT</span>
-        <div class="loading-bar">
-            <div class="loading-bar-fill" id="loadingFill"></div>
-        </div>
-        <span class="font-mono text-[9px] tracking-[0.3em] text-white/20 uppercase">Initializing Environment</span>
+  <!-- ═══ MARQUEE ═══ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Available for full-time roles</span>
+      <span>Full Stack Web Development</span>
+      <span>AI-powered applications</span>
+      <span>Bangalore, India</span>
+      <span>React &amp; TypeScript</span>
+      <span>Node.js &amp; PostgreSQL</span>
+      <span>Available for full-time roles</span>
+      <span>Full Stack Web Development</span>
+      <span>AI-powered applications</span>
+      <span>Bangalore, India</span>
+      <span>React &amp; TypeScript</span>
+      <span>Node.js &amp; PostgreSQL</span>
     </div>
+  </div>
 
-    <!-- Custom Cursor -->
-    <div class="cursor-dot" id="cursorDot"></div>
-    <div class="cursor-ring" id="cursorRing"></div>
-
-    <!-- Grain Overlay -->
-    <div class="grain-overlay"></div>
-
-    <!-- Scroll Progress -->
-    <div class="scroll-progress" id="scrollProgress"></div>
-
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 w-full z-[9000] mix-blend-difference">
-        <div class="flex items-center justify-between px-6 md:px-12 py-6">
-            <a href="#"
-                class="font-mono text-[10px] md:text-[12px] tracking-[0.4em] text-white/50 hover:text-white transition-colors duration-500 uppercase"
-                data-cursor="hover">SRIKARASMIT</a>
-            <div class="font-mono text-[9px] md:text-[10px] tracking-[0.5em] text-white/20 uppercase" id="chapterIndicator">SEC 00 / 05</div>
-        </div>
+  <!-- ═══ HEADER ═══ -->
+  <header>
+    <a href="#hero" class="logo">Srikarasmit</a>
+    <nav>
+      <ul class="site-nav">
+        <li><a href="#about"><span class="nav-num">01 </span>About</a></li>
+        <li><a href="#skills"><span class="nav-num">02 </span>Skills</a></li>
+        <li><a href="#projects"><span class="nav-num">03 </span>Projects</a></li>
+        <li><a href="#contact"><span class="nav-num">04 </span>Contact</a></li>
+      </ul>
     </nav>
+  </header>
 
-    <!-- Audio Toggle -->
-    <button id="audioToggle"
-        class="fixed bottom-8 right-8 z-[9000] w-10 h-10 rounded-full border border-white/10 flex items-center justify-center bg-black/50 backdrop-blur-sm hover:border-crimson/50 transition-all duration-500 group"
-        data-cursor="hover">
-        <span class="iconify text-white/50 group-hover:text-crimson transition-colors duration-500 text-sm"
-            data-icon="lucide:volume-x" id="audioIcon"></span>
-    </button>
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- HERO -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="hero" class="relative h-screen flex items-center justify-center overflow-hidden">
-        <div class="relative" id="heroFracture">
-            <div class="fracture-layer font-sans text-[32px] md:text-[80px] lg:text-[140px] font-black tracking-[-0.06em] text-white leading-none whitespace-nowrap" id="heroMain">SRIKARA<span class="font-extralight tracking-[0.1em]">SMIT</span></div>
-            <div class="fracture-layer font-sans text-[32px] md:text-[80px] lg:text-[140px] font-black tracking-[-0.06em] text-crimson/50 leading-none whitespace-nowrap" id="heroRed">SRIKARA<span class="font-extralight tracking-[0.1em]">SMIT</span></div>
-            <div class="fracture-layer font-sans text-[32px] md:text-[80px] lg:text-[140px] font-black tracking-[-0.06em] text-cyan-400/20 leading-none whitespace-nowrap" id="heroBlue">SRIKARA<span class="font-extralight tracking-[0.1em]">SMIT</span></div>
+  <!-- ═══ HERO ═══ -->
+  <section id="hero">
+    <div>
+      <p class="hero-tag">Full Stack Web Developer — Portfolio</p>
+      <h1 class="hero-name">SRIKARASMIT</h1>
+      <p class="hero-role">Web Design &amp;<br>Development</p>
+      <p class="hero-desc">
+        Motivated and detail-oriented developer with a strong foundation in modern JavaScript
+        frameworks and a growing expertise in machine learning. Building end-to-end, AI-powered
+        applications from responsive front-ends to scalable back-end architectures.
+      </p>
+    </div>
+    <div class="hero-bottom">
+      <div class="hero-meta">
+        <div class="meta-item">
+          <div class="meta-label">Location</div>
+          <div class="meta-value">Bangalore, India</div>
         </div>
-        <div class="absolute bottom-1/3 left-1/2 -translate-x-1/2 text-center" id="heroSub">
-            <div class="hr-crimson mx-auto mb-6"></div>
-            <p class="font-mono text-[11px] md:text-[13px] tracking-[0.3em] text-white/40 uppercase">Web Designer & ML
-                Engineer</p>
+        <div class="meta-item">
+          <div class="meta-label">Status</div>
+          <div class="meta-value">Available for roles</div>
         </div>
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 scroll-indicator">
-            <span class="iconify text-white/30 text-lg" data-icon="lucide:chevron-down"></span>
+        <div class="meta-item">
+          <div class="meta-label">University</div>
+          <div class="meta-value">Atria Institute of Technology</div>
         </div>
-        <div class="absolute top-1/2 right-6 md:right-12 -translate-y-1/2">
-            <p class="font-mono text-[9px] tracking-[0.4em] text-white/15 uppercase" style="writing-mode: vertical-rl;">
-                Scroll to Initialize</p>
+        <div class="meta-item">
+          <div class="meta-label">Local Time · IST</div>
+          <div class="meta-value" id="local-time">—</div>
         </div>
-    </section>
+      </div>
+      <div class="scroll-cue">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
+      </div>
+    </div>
+  </section>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- CHAPTER 01: MANIFESTO -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="chapter01" class="relative min-h-screen py-32 md:py-48 px-6 md:px-12 lg:px-24" data-chapter="01">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="mb-20 md:mb-32">
-                <span class="chapter-num opacity-40">Section 01 // Philosophy</span>
-                <h2 class="mt-6 text-[56px] md:text-[100px] lg:text-[150px] font-black leading-[0.82] tracking-tightest mask-line italic"
-                    id="manifestoTitle">DUALITY</h2>
-                <div class="hr-crimson mt-10 line-draw" id="manifestoLine"></div>
-            </div>
+  <!-- ═══ ABOUT ═══ -->
+  <section id="about">
+    <div class="wrap">
+      <p class="s-decor rv">परिचय</p>
+      <p class="s-eye rv d1">About me</p>
+      <h2 class="s-title rv d2">I'm a full-stack<br>developer &amp; builder</h2>
 
-            <div class="space-y-12 md:space-y-16 max-w-5xl" id="manifestoLines">
-                <p class="text-[24px] md:text-[36px] lg:text-[44px] font-extralight leading-[1.1] tracking-tight mask-line">
-                    Where algorithms meet<br>
-                    <span class="text-white/20 font-black italic">aesthetics.</span>
-                </p>
-                <p class="text-[24px] md:text-[36px] lg:text-[44px] font-extralight leading-[1.1] tracking-tight mask-line">
-                    I do not separate the logic of a neural network<br>
-                    <span class="text-crimson font-medium">from the flow of a user interface.</span>
-                </p>
-                <p class="text-[24px] md:text-[36px] lg:text-[44px] font-extralight leading-[1.1] tracking-tight mask-line">
-                    Design is <span class="text-white/60">structure.</span><br>
-                    Code is <span class="text-white/60">expression.</span>
-                </p>
-                <p class="text-[24px] md:text-[36px] lg:text-[44px] font-extralight leading-[1.1] tracking-tight mask-line">
-                    Precision in data.<br>
-                    <span class="text-white/20 font-black italic">Poetry in pixels.</span>
-                </p>
-                <p class="text-[24px] md:text-[36px] lg:text-[44px] font-extralight leading-[1.1] tracking-tight mask-line">
-                    Two disciplines. One philosophy.<br>
-                    <span class="jp-deco text-crimson/80 text-[32px] md:text-[48px] lg:text-[56px] align-middle">創</span><span
-                        class="text-white/10 mx-6 text-[20px] font-mono tracking-widest align-middle">X</span><span
-                        class="jp-deco text-crimson/80 text-[32px] md:text-[48px] lg:text-[56px] align-middle">智</span>
-                </p>
-            </div>
+      <p class="about-intro rv d3">
+        I design and build end-to-end web applications — combining clean, responsive interfaces 
+        with robust back-end architectures. I bring a curious mindset, a disciplined work ethic, 
+        and a genuine commitment to continuous learning and hands-on problem-solving.
+      </p>
 
-            <div class="absolute top-20 right-8 md:right-24 jp-deco text-[120px] md:text-[200px] text-white/[0.02] select-none pointer-events-none"
-                id="decoKokoro">創</div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- CHAPTER 02: THE CANVAS (Web Design) -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="chapter02" class="relative min-h-screen py-32 md:py-48 px-6 md:px-12 lg:px-24" data-chapter="02">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="mb-20 md:mb-32 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-                <div>
-                    <span class="chapter-num opacity-40">Section 02 // Interactive</span>
-                    <h2 class="mt-6 text-[56px] md:text-[100px] lg:text-[150px] font-black leading-[0.82] tracking-tightest glitch-text italic"
-                        data-text="THE CANVAS">THE CANVAS</h2>
-                </div>
-                <p class="font-mono text-[9px] md:text-[10px] tracking-[0.4em] text-white/20 uppercase max-w-[200px] leading-relaxed">Interfaces forged in intention and structural rigour.</p>
-            </div>
-            <div class="hr-crimson mb-16 line-draw" id="craftLine"></div>
-
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
-                <!-- Web Project 1 -->
-                <div class="md:col-span-7 project-card" data-cursor="hover">
-                    <div class="img-container aspect-[4/3] rounded-sm overflow-hidden">
-                        <img src="https://picsum.photos/seed/dark-ux-flow/900/675.jpg?grayscale" alt="Void Interface"
-                            class="w-full h-full object-cover project-img img-mask-reveal">
-                    </div>
-                    <div class="mt-6 flex items-start justify-between">
-                        <div>
-                            <h3 class="text-[20px] md:text-[24px] font-semibold tracking-tight slow-hover">Aether
-                                Ventures</h3>
-                            <p class="font-mono text-[11px] text-white/30 mt-1 tracking-wider">Brand & Web Platform —
-                                2024</p>
-                        </div>
-                        <span class="font-mono text-[10px] text-crimson tracking-[0.3em]">001</span>
-                    </div>
-                </div>
-
-                <!-- Web Project 2 -->
-                <div class="md:col-span-5 md:mt-24 project-card" data-cursor="hover">
-                    <div class="img-container aspect-[3/4] rounded-sm overflow-hidden">
-                        <img src="https://picsum.photos/seed/brutal-mono/700/933.jpg?grayscale" alt="Akuma"
-                            class="w-full h-full object-cover project-img img-mask-reveal">
-                    </div>
-                    <div class="mt-6 flex items-start justify-between">
-                        <div>
-                            <h3 class="text-[20px] md:text-[24px] font-semibold tracking-tight slow-hover">Noctis
-                                Finance</h3>
-                            <p class="font-mono text-[11px] text-white/30 mt-1 tracking-wider">Dashboard UI/UX — 2024
-                            </p>
-                        </div>
-                        <span class="font-mono text-[10px] text-crimson tracking-[0.3em]">002</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- CHAPTER 03: THE CORE (ML Engineering) -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="chapter03" class="relative min-h-screen py-32 md:py-48 overflow-hidden" data-chapter="03">
-        <div class="absolute inset-0 z-0">
-            <img src="https://picsum.photos/seed/dark-server-rack/1600/900.jpg?grayscale" alt=""
-                class="w-full h-full object-cover" style="filter: brightness(0.1) contrast(1.4);">
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
+      <div class="about-grid">
+        <div class="about-block rv">
+          <div class="about-block-label bk">Profile</div>
+          <div class="about-block-body">
+            I focus on creating thoughtful, well-crafted applications that marry elegant design 
+            with solid engineering. Currently studying at Atria Institute of Technology while 
+            building real-world projects that push my boundaries and expand my expertise in 
+            AI-driven development.
+          </div>
         </div>
 
-        <!-- Decorative code block -->
-        <div class="absolute top-32 right-8 md:right-24 z-10 hidden md:block">
-            <div class="font-mono text-[10px] text-white/[0.06] leading-relaxed terminal-line">
-                <p>def train_model(data):</p>
-                <p>&nbsp;&nbsp;model = Sequential()</p>
-                <p>&nbsp;&nbsp;model.add(Dense(256, activation='relu'))</p>
-                <p>&nbsp;&nbsp;model.compile(loss='mse')</p>
-                <p>&nbsp;&nbsp;return model.fit(data)</p>
+        <div class="about-block rv d1">
+          <div class="about-block-label bk">Education</div>
+          <div class="about-block-body">
+            <div class="edu-row">
+              <div>
+                <div class="edu-name">Atria Institute of Technology</div>
+                <div class="edu-sub">University · B.E.</div>
+              </div>
+              <div class="edu-yr">2023 – Present</div>
             </div>
+            <div class="edu-row">
+              <div>
+                <div class="edu-name">Kendriya Vidyalaya</div>
+                <div class="edu-sub">School</div>
+              </div>
+              <div class="edu-yr">2011 – 2023</div>
+            </div>
+          </div>
         </div>
 
-        <div class="relative z-10 px-6 md:px-12 lg:px-24 max-w-[1400px] mx-auto">
-            <div class="mb-20 md:mb-40 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-                <div class="md:translate-x-[-20px]">
-                    <span class="chapter-num opacity-40">Section 03 // Intelligence</span>
-                    <h2 class="mt-6 text-[56px] md:text-[100px] lg:text-[150px] font-black leading-[0.82] tracking-tightest overlap-text glitch-text italic"
-                        data-text="THE CORE" id="philosophyTitle">THE CORE</h2>
-                </div>
-                <p class="font-mono text-[9px] md:text-[10px] tracking-[0.4em] text-white/20 uppercase max-w-[200px] leading-relaxed text-right">Machine Learning & neural architecture design.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-y-12 md:gap-8">
-                <!-- ML Quote -->
-                <div class="md:col-span-10 md:col-start-2 mb-12 md:mb-24">
-                    <blockquote
-                        class="text-[28px] md:text-[44px] lg:text-[60px] font-extralight leading-[1.05] tracking-tightest mask-line italic"
-                        id="philQuote1">
-                        "Data does not lie, but it requires<br>
-                        <span class="text-crimson/80 font-black not-italic">a translator</span> <span class="text-white/20">to speak truth.</span>"
-                    </blockquote>
-                </div>
-
-                <!-- ML Project 1 -->
-                <div class="md:col-span-5 project-card" data-cursor="hover">
-                    <div class="img-container aspect-[16/10] rounded-sm overflow-hidden border border-white/5">
-                        <img src="https://picsum.photos/seed/neural-dark/800/500.jpg?grayscale" alt="Vision AI"
-                            class="w-full h-full object-cover project-img">
-                    </div>
-                    <div class="mt-6">
-                        <h3 class="text-[20px] md:text-[24px] font-semibold tracking-tight slow-hover">Oculus Core</h3>
-                        <p class="font-mono text-[11px] text-white/30 mt-1 tracking-wider">Computer Vision — YOLOv8,
-                            PyTorch</p>
-                        <div class="hr-crimson mt-4 mb-4"></div>
-                        <p class="text-[13px] font-light text-white/30 leading-relaxed">Real-time object detection
-                            system optimized for edge deployment with 98.3% mAP score.</p>
-                    </div>
-                </div>
-
-                <!-- ML Project 2 -->
-                <div class="md:col-span-5 md:col-start-7 project-card" data-cursor="hover">
-                    <div class="img-container aspect-[16/10] rounded-sm overflow-hidden border border-white/5">
-                        <img src="https://picsum.photos/seed/algorithm-tree/800/500.jpg?grayscale" alt="NLP"
-                            class="w-full h-full object-cover project-img">
-                    </div>
-                    <div class="mt-6">
-                        <h3 class="text-[20px] md:text-[24px] font-semibold tracking-tight slow-hover">Vāk NLP</h3>
-                        <p class="font-mono text-[11px] text-white/30 mt-1 tracking-wider">Natural Language — BERT,
-                            Transformers</p>
-                        <div class="hr-crimson mt-4 mb-4"></div>
-                        <p class="text-[13px] font-light text-white/30 leading-relaxed">Sanskrit and vernacular language
-                            parsing engine built on custom fine-tuned transformer architecture.</p>
-                    </div>
-                </div>
-
-                <!-- Japanese decorative -->
-                <div class="md:col-span-4 md:col-start-9 flex items-center justify-center mt-12">
-                    <span class="jp-deco text-[100px] md:text-[160px] text-white/[0.03] select-none"
-                        id="philZen">智</span>
-                </div>
-            </div>
+        <div class="about-block rv d2">
+          <div class="about-block-label bk">Currently</div>
+          <div class="about-block-body">
+            Open to full-time roles and freelance engagements in full-stack development, 
+            AI-powered applications, and modern web engineering.
+          </div>
         </div>
-    </section>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- CHAPTER 04: THE FORGE (Process & Stack) -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="chapter04" class="relative py-32 md:py-64 px-6 md:px-12 lg:px-24" data-chapter="04">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="mb-20 md:mb-40 text-right md:text-left">
-                <span class="chapter-num opacity-40">Section 04 // Arsenal</span>
-                <h2 class="mt-6 text-[56px] md:text-[100px] lg:text-[150px] font-black leading-[0.82] tracking-tightest glitch-text italic"
-                    data-text="THE FORGE">THE FORGE</h2>
-                <div class="flex justify-end md:justify-start mt-6">
-                    <p class="font-mono text-[9px] md:text-[10px] tracking-[0.4em] text-white/20 uppercase max-w-[200px] leading-relaxed">Tools, paradigms & technological rituals.</p>
-                </div>
-            </div>
-
-            <!-- Brutalist Stack Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <!-- Design Stack -->
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:figma"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">Figma</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">UI / UX / Systems</p>
-                </div>
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:code-2"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">React / Next</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Frontend / SSR</p>
-                </div>
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:wind"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">Tailwind</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Styling / Speed</p>
-                </div>
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:sparkles"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">GSAP</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Motion / Ritual</p>
-                </div>
-
-                <!-- ML Stack -->
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:brain-circuit"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">PyTorch</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Deep Learning</p>
-                </div>
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:database"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">TensorFlow</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Production ML</p>
-                </div>
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:terminal"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">Python</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Logic / Pipeline</p>
-                </div>
-                <div class="border border-white/5 p-6 md:p-8 hover:border-crimson/30 transition-all duration-700 group">
-                    <span
-                        class="iconify text-2xl text-white/30 group-hover:text-crimson transition-colors duration-700 mb-6 block"
-                        data-icon="lucide:eye"></span>
-                    <h4 class="font-semibold tracking-tight mb-1">OpenCV</h4>
-                    <p class="font-mono text-[9px] text-white/20 tracking-wider uppercase">Computer Vision</p>
-                </div>
-            </div>
+        <div class="about-block rv d3">
+          <div class="about-block-label bk">Contact</div>
+          <div class="about-block-body">
+            srikarasmit.dev@gmail.com<br>
+            +91 940 937 1229
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- CHAPTER 05: EPILOGUE -->
-    <!-- ═══════════════════════════════════════ -->
-    <section id="chapter05" class="relative min-h-screen flex items-center justify-center py-48 px-6 overflow-hidden"
-        data-chapter="05">
-        <div class="text-center max-w-4xl mx-auto relative z-10">
-            <span class="chapter-num opacity-40">Section 05 // Connection</span>
-            <div class="mt-12 mb-16">
-                <span class="jp-deco text-[80px] md:text-[160px] text-white/[0.03] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none">合一</span>
-            </div>
-            <h2 class="text-[48px] md:text-[80px] lg:text-[120px] font-black tracking-tightest leading-[0.85] mask-line italic"
-                id="epilogueTitle">
-                LET'S BUILD<br>
-                <span class="text-crimson not-italic">TOGETHER</span>
-            </h2>
-            <div class="hr-crimson mx-auto mt-16 mb-16 line-draw active"></div>
-            <p class="text-[16px] md:text-[18px] font-extralight text-white/40 leading-relaxed max-w-xl mx-auto mb-16 tracking-tight">
-                Whether it's an immersive web experience or an intelligent neural system, I design and engineer solutions with ritualistic precision.
-            </p>
-            <div class="group inline-block">
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=srikarasmit.dev@gmail.com"
-                    target="_blank"
-                    class="font-mono text-[13px] md:text-[16px] tracking-[0.3em] text-white/50 group-hover:text-crimson transition-all duration-700 uppercase"
-                    data-cursor="hover">
-                    initialize_contact_sequence()
-                </a>
-                <div class="h-px w-0 group-hover:w-full bg-crimson transition-all duration-700 mt-2 mx-auto"></div>
-            </div>
-            <div class="mt-16 flex items-center justify-center gap-8">
-                <a href="#"
-                    class="font-mono text-[10px] tracking-[0.2em] text-white/20 hover:text-white/60 transition-colors duration-500 uppercase"
-                    data-cursor="hover">LinkedIn</a>
-                <span class="w-1 h-1 bg-white/10 rounded-full"></span>
-                <a href="#"
-                    class="font-mono text-[10px] tracking-[0.2em] text-white/20 hover:text-white/60 transition-colors duration-500 uppercase"
-                    data-cursor="hover">GitHub</a>
-                <span class="w-1 h-1 bg-white/10 rounded-full"></span>
-                <a href="#"
-                    class="font-mono text-[10px] tracking-[0.2em] text-white/20 hover:text-white/60 transition-colors duration-500 uppercase"
-                    data-cursor="hover">Kaggle</a>
-            </div>
+  <!-- ═══ SKILLS ═══ -->
+  <section id="skills">
+    <div class="wrap">
+      <p class="s-decor rv">कौशल</p>
+      <p class="s-eye rv d1">Technical stack</p>
+      <h2 class="s-title rv d2">Skills</h2>
+
+      <div class="skills-wrap rv d3">
+        <div class="skill">Python</div>
+        <div class="skill">JavaScript</div>
+        <div class="skill">TypeScript</div>
+        <div class="skill">HTML5 &amp; CSS3</div>
+        <div class="skill">React</div>
+        <div class="skill">Node.js</div>
+        <div class="skill">PostgreSQL</div>
+        <div class="skill">Tailwind CSS</div>
+        <div class="skill">Recharts</div>
+        <div class="skill">REST APIs</div>
+        <div class="skill">WebSockets</div>
+        <div class="skill">FastAPI</div>
+        <div class="skill">Git &amp; GitHub</div>
+        <div class="skill">Machine Learning</div>
+        <div class="skill">Responsive Design</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PROJECTS ═══ -->
+  <section id="projects">
+    <div class="wrap">
+      <p class="s-decor rv">कार्य</p>
+      <p class="s-eye rv d1">Selected work</p>
+      <h2 class="s-title rv d2">Projects</h2>
+
+      <article class="project rv">
+        <div>
+          <h3 class="proj-title">LegalEase</h3>
+          <p class="proj-desc">
+            A full-stack, AI-powered legal advisory web application designed to help law firms streamline 
+            client management, document analysis, and legal consultations. Built with React, TypeScript, 
+            and Tailwind CSS, the platform features an intelligent legal assistant capable of explaining 
+            complex legal concepts, a real-time analytics dashboard for monitoring case and client activity, 
+            and an advanced document-analysis engine that classifies documents, identifies risk factors, 
+            and generates actionable recommendations. Includes secure multi-role authentication and a 
+            mobile-first responsive interface with a modular component architecture optimised for 
+            performance and scalability.
+          </p>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="border-t border-white/5 py-8 px-6 md:px-12">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between">
-            <span class="font-mono text-[10px] text-white/15 tracking-wider">© 2024 SRIKARASMIT</span>
-            <span class="font-mono text-[10px] text-white/15 tracking-wider">Design × Intelligence</span>
+        <div class="proj-meta">
+          <div>
+            <div class="proj-meta-label bk">Year</div>
+            <div class="proj-meta-val">2025</div>
+          </div>
+          <div>
+            <div class="proj-meta-label bk">Stack</div>
+            <div class="proj-meta-val">React · TypeScript<br>Tailwind CSS</div>
+          </div>
+          <div>
+            <div class="proj-meta-label bk">Role</div>
+            <div class="proj-meta-val">Design &amp; Development</div>
+          </div>
         </div>
-    </footer>
+      </article>
 
+      <article class="project rv d1">
+        <div>
+          <h3 class="proj-title">Financial Analytics<br>Dashboard</h3>
+          <p class="proj-desc">
+            A full-stack financial management platform enabling users to track transactions, monitor 
+            budgets, and gain deep financial intelligence. Engineered a robust Node.js and PostgreSQL 
+            backend supporting asynchronous CSV data ingestion and real-time WebSocket notifications, 
+            paired with a highly responsive React frontend. Implements advanced data visualisation 
+            with Recharts for dynamic income-versus-expense tracking, savings forecasting, and 
+            statistical anomaly detection. Designed a custom UI/UX using Tailwind CSS, delivering 
+            a premium, modern aesthetic through a hybrid neumorphic and glassmorphic design system 
+            built with highly tactile, interactive components.
+          </p>
+        </div>
+        <div class="proj-meta">
+          <div>
+            <div class="proj-meta-label bk">Year</div>
+            <div class="proj-meta-val">2025</div>
+          </div>
+          <div>
+            <div class="proj-meta-label bk">Stack</div>
+            <div class="proj-meta-val">Node.js · PostgreSQL<br>React · Recharts</div>
+          </div>
+          <div>
+            <div class="proj-meta-label bk">Role</div>
+            <div class="proj-meta-val">Full-Stack Development</div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- SCRIPTS -->
-    <!-- ═══════════════════════════════════════ -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+  <!-- ═══ CONTACT ═══ -->
+  <section id="contact">
+    <div class="wrap">
+      <p class="s-decor rv">संपर्क</p>
+      <p class="s-eye rv d1">Get in touch</p>
+      <h2 class="contact-head rv d2">
+        Let's build something<br><em>remarkable together.</em>
+      </h2>
 
-            // ─── LOADING SCREEN ───
-            const loader = document.getElementById('loader');
-            const loadingFill = document.getElementById('loadingFill');
+      <div class="contact-links">
+        <a class="cl-item rv" href="mailto:srikarasmit.dev@gmail.com">
+          <div>
+            <div class="cl-lbl">Email</div>
+            <div class="cl-val">srikarasmit.dev@gmail.com</div>
+          </div>
+          <span class="cl-arrow">→</span>
+        </a>
+        <a class="cl-item rv d1" href="tel:+919409371229">
+          <div>
+            <div class="cl-lbl">Phone</div>
+            <div class="cl-val">+91 940 937 1229</div>
+          </div>
+          <span class="cl-arrow">→</span>
+        </a>
+        <div class="cl-item rv d2" style="cursor: default;">
+          <div>
+            <div class="cl-lbl">Location</div>
+            <div class="cl-val">Bangalore, Karnataka, India</div>
+          </div>
+          <span class="cl-arrow" style="opacity:0.3;">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            gsap.to(loadingFill, {
-                width: '100%', duration: 1.5, ease: 'power2.inOut',
-                onComplete: () => {
-                    gsap.to(loader, {
-                        opacity: 0, duration: 0.6, ease: 'power2.inOut',
-                        onComplete: () => {
-                            loader.style.display = 'none';
-                            initAnimations();
-                        }
-                    });
-                }
-            });
+  <!-- ═══ FOOTER ═══ -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-col-head bk">Menu</div>
+        <ul class="f-links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-head bk">Contact</div>
+        <ul class="f-links">
+          <li><a href="mailto:srikarasmit.dev@gmail.com">srikarasmit.dev@gmail.com</a></li>
+          <li><a href="tel:+919409371229">+91 940 937 1229</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-head bk">Location</div>
+        <ul class="f-links">
+          <li><p>Bangalore,<br>Karnataka, India</p></li>
+        </ul>
+        <div class="f-credit" style="margin-top:36px;">Design &amp; Development by Srikarasmit</div>
+      </div>
+    </div>
+  </footer>
 
-            // ─── LENIS SMOOTH SCROLL ───
-            const lenis = new Lenis({
-                duration: 1.4,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                smoothWheel: true,
-            });
+  <script>
+    /* ── LOCAL TIME ── */
+    const timeEl = document.getElementById('local-time');
+    function tick() {
+      timeEl.textContent = new Date().toLocaleTimeString('en-IN', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: true, timeZone: 'Asia/Kolkata'
+      });
+    }
+    tick();
+    setInterval(tick, 1000);
 
-            lenis.on('scroll', ScrollTrigger.update);
-            gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-            gsap.ticker.lagSmoothing(0);
+    /* ── SCROLL PROGRESS ── */
+    const bar = document.getElementById('progress');
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+      bar.style.width = pct + '%';
+    }, { passive: true });
 
-            // ─── CUSTOM CURSOR ───
-            const dot = document.getElementById('cursorDot');
-            const ring = document.getElementById('cursorRing');
-            let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
-
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                gsap.to(dot, { x: mouseX - 4, y: mouseY - 4, duration: 0.1, ease: 'power2.out' });
-            });
-
-            function animateRing() {
-                ringX += (mouseX - ringX) * 0.12;
-                ringY += (mouseY - ringY) * 0.12;
-                ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`;
-                requestAnimationFrame(animateRing);
-            }
-            animateRing();
-
-            // Cursor hover states
-            document.querySelectorAll('[data-cursor="hover"]').forEach(el => {
-                el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-                el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-            });
-
-            // ─── SCROLL PROGRESS ───
-            const progressBar = document.getElementById('scrollProgress');
-            window.addEventListener('scroll', () => {
-                const scrollTop = window.scrollY;
-                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-                const progress = (scrollTop / docHeight) * 100;
-                progressBar.style.height = progress + '%';
-            });
-
-            // ─── CHAPTER INDICATOR ───
-            const chapters = document.querySelectorAll('[data-chapter]');
-            const indicator = document.getElementById('chapterIndicator');
-
-            chapters.forEach(ch => {
-                ScrollTrigger.create({
-                    trigger: ch,
-                    start: 'top 50%',
-                    end: 'bottom 50%',
-                    onEnter: () => { indicator.textContent = ch.dataset.chapter + ' / 05'; },
-                    onEnterBack: () => { indicator.textContent = ch.dataset.chapter + ' / 05'; },
-                });
-            });
-
-            // ─── AUDIO TOGGLE ───
-            let audioCtx = null;
-            let isPlaying = false;
-            let gainNode = null;
-            const audioToggle = document.getElementById('audioToggle');
-            const audioIcon = document.getElementById('audioIcon');
-
-            function createAmbient() {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0;
-                gainNode.connect(audioCtx.destination);
-
-                const osc1 = audioCtx.createOscillator();
-                osc1.type = 'sine';
-                osc1.frequency.value = 55;
-                const filt1 = audioCtx.createBiquadFilter();
-                filt1.type = 'lowpass';
-                filt1.frequency.value = 180;
-                osc1.connect(filt1);
-                filt1.connect(gainNode);
-                osc1.start();
-
-                const osc2 = audioCtx.createOscillator();
-                osc2.type = 'sine';
-                osc2.frequency.value = 82.41;
-                const filt2 = audioCtx.createBiquadFilter();
-                filt2.type = 'lowpass';
-                filt2.frequency.value = 150;
-                osc2.connect(filt2);
-                filt2.connect(gainNode);
-                osc2.start();
-
-                const osc3 = audioCtx.createOscillator();
-                osc3.type = 'sine';
-                osc3.frequency.value = 36.71;
-                const filt3 = audioCtx.createBiquadFilter();
-                filt3.type = 'lowpass';
-                filt3.frequency.value = 100;
-                const gain3 = audioCtx.createGain();
-                gain3.gain.value = 0.5;
-                osc3.connect(filt3);
-                filt3.connect(gain3);
-                gain3.connect(gainNode);
-                osc3.start();
-            }
-
-            audioToggle.addEventListener('click', () => {
-                if (!audioCtx) createAmbient();
-                if (!isPlaying) {
-                    gainNode.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 1.5);
-                    audioIcon.setAttribute('data-icon', 'lucide:volume-2');
-                    audioToggle.classList.add('audio-pulse');
-                    isPlaying = true;
-                } else {
-                    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.8);
-                    audioIcon.setAttribute('data-icon', 'lucide:volume-x');
-                    audioToggle.classList.remove('audio-pulse');
-                    isPlaying = false;
-                }
-            });
-
-            // ─── MAIN ANIMATIONS ───
-            function initAnimations() {
-
-                // ── Hero Entrance ──
-                gsap.from('#heroMain', { opacity: 0, scale: 0.8, duration: 1.2, ease: 'power3.out' });
-                gsap.from('#heroSub', { opacity: 0, y: 30, duration: 1, delay: 0.5, ease: 'power3.out' });
-
-                // ── Hero Fracture on Scroll ──
-                gsap.to('#heroRed', {
-                    x: -30, y: -15, opacity: 0.8,
-                    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1.5 }
-                });
-                gsap.to('#heroBlue', {
-                    x: 25, y: 10, opacity: 0.6,
-                    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1.5 }
-                });
-                gsap.to('#heroFracture', {
-                    y: -100, opacity: 0,
-                    scrollTrigger: { trigger: '#hero', start: '60% top', end: 'bottom top', scrub: 1 }
-                });
-
-                // ── Chapter 01: Manifesto ──
-                gsap.to('#manifestoTitle', {
-                    clipPath: 'inset(0 -10% 0 0)',
-                    duration: 1.2,
-                    scrollTrigger: { trigger: '#chapter01', start: 'top 70%', end: 'top 30%', scrub: 1 }
-                });
-
-                ScrollTrigger.create({
-                    trigger: '#chapter01',
-                    start: 'top 60%',
-                    onEnter: () => document.getElementById('manifestoLine').classList.add('active'),
-                });
-
-                const mLines = document.querySelectorAll('#manifestoLines .mask-line');
-                mLines.forEach((line, i) => {
-                    gsap.to(line, {
-                        clipPath: 'inset(0 0% 0 0)',
-                        duration: 1,
-                        scrollTrigger: { trigger: line, start: 'top 80%', end: 'top 50%', scrub: 0.8 }
-                    });
-                });
-
-                gsap.to('#decoKokoro', {
-                    y: -80,
-                    scrollTrigger: { trigger: '#chapter01', start: 'top bottom', end: 'bottom top', scrub: 2 }
-                });
-
-                // ── Chapter 02: The Canvas ──
-                ScrollTrigger.create({
-                    trigger: '#chapter02',
-                    start: 'top 60%',
-                    onEnter: () => document.getElementById('craftLine').classList.add('active'),
-                });
-
-                document.querySelectorAll('.img-mask-reveal').forEach(img => {
-                    gsap.to(img, {
-                        clipPath: 'circle(75% at 50% 50%)',
-                        duration: 1.5,
-                        ease: 'power2.inOut',
-                        scrollTrigger: { trigger: img, start: 'top 80%', end: 'top 40%', scrub: 1 }
-                    });
-                });
-
-                gsap.from('#chapter02 .project-card', {
-                    y: 60, opacity: 0, stagger: 0.15, duration: 1, ease: 'power3.out',
-                    scrollTrigger: { trigger: '#chapter02', start: 'top 60%' }
-                });
-
-                // ── Chapter 03: The Core ──
-                gsap.from('#philosophyTitle', {
-                    y: 60, opacity: 0, duration: 1.2,
-                    scrollTrigger: { trigger: '#chapter03', start: 'top 70%' }
-                });
-
-                gsap.to('#philQuote1', {
-                    clipPath: 'inset(0 -10% 0 0)',
-                    scrollTrigger: { trigger: '#philQuote1', start: 'top 75%', end: 'top 45%', scrub: 1 }
-                });
-
-                gsap.from('#chapter03 .project-card', {
-                    y: 60, opacity: 0, stagger: 0.15, duration: 1, ease: 'power3.out',
-                    scrollTrigger: { trigger: '#chapter03', start: 'top 50%' }
-                });
-
-                gsap.from('#philZen', {
-                    scale: 0.5, opacity: 0, duration: 2, ease: 'power2.out',
-                    scrollTrigger: { trigger: '#philZen', start: 'top 85%' }
-                });
-
-                // ── Chapter 04: The Forge ──
-                gsap.from('#chapter04 .border', {
-                    y: 40, opacity: 0, stagger: 0.05, duration: 0.8, ease: 'power3.out',
-                    scrollTrigger: { trigger: '#chapter04', start: 'top 60%' }
-                });
-
-                // ── Chapter 05: Epilogue ──
-                gsap.to('#epilogueTitle', {
-                    clipPath: 'inset(0 -10% 0 0)',
-                    scrollTrigger: { trigger: '#chapter05', start: 'top 60%', end: 'top 30%', scrub: 1 }
-                });
-
-                gsap.from('#chapter05 .jp-deco', {
-                    scale: 0.3, opacity: 0, rotation: -10, duration: 1.5, ease: 'power3.out',
-                    scrollTrigger: { trigger: '#chapter05', start: 'top 70%' }
-                });
-
-            } // end initAnimations
-
-        });
-    </script>
-
+    /* ── REVEAL ON SCROLL ── */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -36px 0px' });
+    document.querySelectorAll('.rv').forEach(el => io.observe(el));
+  </script>
 </body>
-
 </html>
